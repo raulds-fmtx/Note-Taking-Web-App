@@ -2,7 +2,6 @@ const express = require("express");
 const generateUniqueId = require("generate-unique-id");
 const fs = require("fs");
 const path = require("path");
-const notes = require("./db/db.json");
 
 const PORT = 3001;
 
@@ -25,7 +24,18 @@ app.get("/notes", (req, res) => {
 // GET request for notes
 app.get("/api/notes", (req, res) => {
   console.info(`GET /api/notes`);
-  res.status(200).json(notes);
+
+  // Obtain existing notes
+  fs.readFile("./db/db.json", "utf8", (err, data) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json("Error in retrieving notes.");
+    } else {
+      // Convert string into JSON object
+      const notes = JSON.parse(data);
+      res.status(200).json(notes);
+    }
+  });
 });
 
 // POST request to add a note
