@@ -93,6 +93,53 @@ app.post('/api/notes', (req, res) => {
   }
 });
 
+app.delete("/api/notes/:id", (req, res) => {
+  // Log that a DELETE request was received
+  console.info(`${req.method} request received to delete a note`);
+
+  if (req.params.id) {
+    // Obtain existing notes
+    fs.readFile("./db/db.json", "utf8", (err, data) => {
+      if (err) {
+        console.error(err);
+      } else {
+        // Convert string into JSON object
+        let parsedNotes = JSON.parse(data);
+        const currLength = parsedNotes.length;
+
+        // Add a new review
+        parsedNotes = parsedNotes.filter((note) => note.id !== req.params.id);
+        if (parsedNotes.length === currLength) {
+          console.error("Error: id not found");
+        }
+
+        // Write updated reviews back to the file
+        fs.writeFile(
+          "./db/db.json",
+          JSON.stringify(parsedNotes, null, 4),
+          (writeErr) =>
+            writeErr
+              ? console.error(writeErr)
+              : console.info("Successfully updated notes!")
+        );
+      }
+    });
+
+    const response = {
+      status: "success",
+      id: req.params.id,
+    };
+
+    console.log(response);
+
+    // res.json() returns data including a status message indicating the success of the request along with the newly created note data.
+    res.status(201).json(response);
+  } else {
+    // the purpose of the else statement is to allow a way to throw an error if the id is not present.
+    res.status(500).json("Error in deleting note");
+  }
+});
+
 app.listen(PORT, () =>
   console.log(`App listening at http://localhost:${PORT}`)
 );
