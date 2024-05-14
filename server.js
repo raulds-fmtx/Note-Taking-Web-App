@@ -3,7 +3,7 @@ const generateUniqueId = require("generate-unique-id");
 const fs = require("fs");
 const path = require("path");
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 const app = express();
 
@@ -104,19 +104,18 @@ app.delete("/api/notes/:id", (req, res) => {
         console.error(err);
       } else {
         // Convert string into JSON object
-        let parsedNotes = JSON.parse(data);
-        const currLength = parsedNotes.length;
+        const parsedNotes = JSON.parse(data);
 
         // Add a new review
-        parsedNotes = parsedNotes.filter((note) => note.id !== req.params.id);
-        if (parsedNotes.length === currLength) {
+        const filteredNotes = parsedNotes.filter((note) => note.id !== req.params.id);
+        if (filteredNotes.length === parsedNotes.length) {
           console.error("Error: id not found");
         }
 
         // Write updated reviews back to the file
         fs.writeFile(
           "./db/db.json",
-          JSON.stringify(parsedNotes, null, 4),
+          JSON.stringify(filteredNotes, null, 4),
           (writeErr) =>
             writeErr
               ? console.error(writeErr)
